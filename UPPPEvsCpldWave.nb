@@ -2839,6 +2839,79 @@ superior. \
  CellChangeTimes->{{3.9815522637217293`*^9, 
   3.9815523559746094`*^9}},ExpressionUUID->"3dc35825-fb7c-7640-93ad-\
 2d4fc84f8131"]
+,
+Cell["UPPE vs Coupled-Wave FFT Workload Comparison", "Section"],
+
+Cell[BoxData[{
+ RowBox[{RowBox[{"(*", " Unit system and physical setup for Chapter 3.4: FFT workload proxy comparison.", "*)"}], "
+", RowBox[{"c", "=", RowBox[{"3", "*", SuperscriptBox["10", "8"]}]}], ";", RowBox[{"fs", "=", SuperscriptBox["10", RowBox[{"-", "15"}]]}], ";", RowBox[{"ps", "=", SuperscriptBox["10", RowBox[{"-", "12"}]]}], ";", RowBox[{"nm", "=", SuperscriptBox["10", RowBox[{"-", "9"}]]}], ";", RowBox[{"THz", "=", SuperscriptBox["10", "12"]}], ";", RowBox[{"TBP", "=", "0.32"}], ";"}], "
+",
+ RowBox[{RowBox[{"freqTHz", "[", "lambdaNm_", "]"}], ":=", RowBox[{"c", "/", RowBox[{"(", RowBox[{"lambdaNm", "*", "nm", "*", "THz"}], ")"}]}]}], ";", "
+",
+ RowBox[{RowBox[{"idlerWavelength", "[", RowBox[{"lambdaP_", ",", "lambdaS_"}], "]"}], ":=", RowBox[{"1", "/", RowBox[{"(", RowBox[{RowBox[{"1", "/", "lambdaP"}], "-", RowBox[{"1", "/", "lambdaS"}]}], ")"}]}]}], ";", "
+",
+ RowBox[{"lambdaPnm", "=", "1040"}], ";", RowBox[{"lambdaSnm", "=", "1470"}], ";", RowBox[{"lambdaInm", "=", RowBox[{"idlerWavelength", "[", RowBox[{"lambdaPnm", ",", "lambdaSnm"}], "]"}]}], ";", "
+",
+ RowBox[{"nuP", "=", RowBox[{"freqTHz", "[", "lambdaPnm", "]"}]}], ";", RowBox[{"nuS", "=", RowBox[{"freqTHz", "[", "lambdaSnm", "]"}]}], ";", RowBox[{"nuI", "=", RowBox[{"nuP", "-", "nuS"}]}], ";", "
+",
+ RowBox[{"deltaNuS", "=", RowBox[{"nuS", "-", "nuP"}]}], ";", RowBox[{"deltaNuI", "=", RowBox[{"nuI", "-", "nuP"}]}], ";", "
+",
+ RowBox[{"Tmin", "=", RowBox[{"10", "*", "ps"}]}], ";", RowBox[{"TminFromPhysics", "=", "Tmin"}], ";"}], "Input"],
+
+Cell[BoxData[
+ RowBox[{"Grid", "[", RowBox[{"{", RowBox[{
+  RowBox[{"{", RowBox[{""nu_p (THz)"", ",", "nuP"}], "}"}], ",",
+  RowBox[{"{", RowBox[{""nu_s (THz)"", ",", "nuS"}], "}"}], ",",
+  RowBox[{"{", RowBox[{""nu_i (THz)"", ",", "nuI"}], "}"}], ",",
+  RowBox[{"{", RowBox[{""Delta nu_s = nu_s - nu_p (THz)"", ",", "deltaNuS"}], "}"}], ",",
+  RowBox[{"{", RowBox[{""Delta nu_i = nu_i - nu_p (THz)"", ",", "deltaNuI"}], "}"}]}
+ , "}"}], ",", RowBox[{"Frame", "->", "All"}]}], "]"}]], "Input"],
+
+Cell[BoxData[{
+ RowBox[{RowBox[{"nextPow2", "[", "x_", "]"}], ":=", RowBox[{"2", "^", RowBox[{"Ceiling", "[", RowBox[{"Log", "[", RowBox[{"2", ",", RowBox[{"Max", "[", RowBox[{"x", ",", "1"}], "]"}]}], "]"}], "]"}]}]}], ";"], "
+",
+ RowBox[{RowBox[{"fftCost", "[", "n_", "]"}], ":=", RowBox[{"n", "*", RowBox[{"Log", "[", RowBox[{"2", ",", "n"}], "]"}]}]}], ";"], "
+",
+ RowBox[{RowBox[{"bandwidthFromTau", "[", "tau_", "]"}], ":=", RowBox[{"TBP", "/", "tau"}]}], ";"], "
+",
+ RowBox[{RowBox[{"requiredPointsCWE", "[", RowBox[{"tau_", ",", "twin_"}], "]"}], ":=", RowBox[{"nextPow2", "[", RowBox[{"twin", "*", RowBox[{"bandwidthFromTau", "[", "tau", "]"}]}], "]"}]}], ";"], "
+",
+ RowBox[{RowBox[{"deltaNuUPPE", "[", "tau_", "]"}], ":=", RowBox[{"(", RowBox[{"nuP", "+", RowBox[{"bandwidthFromTau", "[", "tau", "]"}], "/", "2"}], ")", "-", RowBox[{"(", RowBox[{"nuI", "-", RowBox[{"bandwidthFromTau", "[", "tau", "]"}], "/", "2"}], ")"}]}]}], ";"], "
+",
+ RowBox[{RowBox[{"requiredPointsUPPE", "[", RowBox[{"tau_", ",", "twin_"}], "]"}], ":=", RowBox[{"nextPow2", "[", RowBox[{"twin", "*", "THz", "*", RowBox[{"deltaNuUPPE", "[", "tau", "]"}]}], "]"}]}], ";"], "
+",
+ RowBox[{RowBox[{"costCWE", "[", RowBox[{"tau_", ",", "twin_"}], "]"}], ":=", RowBox[{"3", "*", RowBox[{"fftCost", "[", RowBox[{"requiredPointsCWE", "[", RowBox[{"tau", ",", "twin"}], "]"}], "]"}]}]}], ";"], "
+",
+ RowBox[{RowBox[{"costUPPE", "[", RowBox[{"tau_", ",", "twin_"}], "]"}], ":=", RowBox[{"fftCost", "[", RowBox[{"requiredPointsUPPE", "[", RowBox[{"tau", ",", "twin"}], "]"}], "]"}]}], ";"], "
+",
+ RowBox[{RowBox[{"ratioCost", "[", RowBox[{"tau_", ",", "twin_"}], "]"}], ":=", RowBox[{RowBox[{"costUPPE", "[", RowBox[{"tau", ",", "twin"}], "]"}], "/", RowBox[{"costCWE", "[", RowBox[{"tau", ",", "twin"}], "]"}]}]}], ";"], "
+",
+ RowBox[{RowBox[{"twinCaseA", "[", "tau_", "]"}], ":=", RowBox[{"60", "*", "tau"}]}], ";", RowBox[{RowBox[{"twinCaseB", "[", "tau_", "]"}], ":=", RowBox[{"Max", "[", RowBox[{RowBox[{"60", "*", "tau"}], ",", "Tmin"}], "]"}]}], ";"}
+], "Input"],
+
+Cell[BoxData[
+ RowBox[{"(*", " Figure/data export helpers for thesis chapter plots.", "*)", "
+",
+  RowBox[{"tauList", "=", RowBox[{"10", "^", RowBox[{"Subdivide", "[", RowBox[{RowBox[{"Log10", "[", RowBox[{"20", "*", "fs"}], "]"}], ",", RowBox[{"Log10", "[", RowBox[{"10", "*", "ps"}], "]"}], ",", "179"}], "]"}]}]}], ";"}]], "Input"],
+
+Cell["Assumptions / Notes:
+- This notebook compares an FFT workload proxy, not actual measured runtime.
+- The comparison isolates spectral-grid burden and does not include ODE step count, implementation overhead, or memory effects.
+- The CWE cost is modeled as three narrowband envelope grids.
+- The UPPE cost is modeled as one broadband carrier-resolved grid covering the entire pump-signal-idler span.
+- Pulse bandwidth is estimated from Delta nu tau_p = 0.32.
+- Grid sizes are rounded upward to the next power of two.
+- Case B includes a minimum temporal window T_min = 10 ps to mimic walk-off / GVM requirements.
+- Adopted UPPE span: Delta nu_UPPE,total = (nu_p + Delta nu_pulse/2) - (nu_i - Delta nu_pulse/2).
+- Quantization to powers of two can appear as staircase behavior in chi curves.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"(*", " Numeric QC snapshot at tau_p = 150 fs ", "*)", "
+",
+  RowBox[{"tauQC", "=", RowBox[{"150", "*", "fs"}]}], ";", "
+",
+  RowBox[{"{", RowBox[{"nuP", ",", "nuS", ",", "nuI", ",", RowBox[{RowBox[{"bandwidthFromTau", "[", "tauQC", "]"}], "/", "THz"}], ",", RowBox[{"ratioCost", "[", RowBox[{"tauQC", ",", RowBox[{"twinCaseA", "[", "tauQC", "]"}]}], "]"}], ",", RowBox[{"ratioCost", "[", RowBox[{"tauQC", ",", RowBox[{"twinCaseB", "[", "tauQC", "]"}]}], "]"}]}], "}"}]], "Input"]
+
 },
 WindowSize->{894, 713.25},
 WindowMargins->{{162.75, Automatic}, {-1.5, Automatic}},
